@@ -1,6 +1,6 @@
 # Sharing my Docker Notes from start to end
 
-![alt text](assets/docker.png)
+<img src="assets/docker.png" alt="Docker Container Concept" width="400" height="200">
 
 ## Contents
 
@@ -57,14 +57,9 @@ Docker is a platform that allows you to develop, ship, and run applications in c
 ## Key Benefits
 
 - All configurations are done inside the container and can be easily shared across systems
-- Provides a lightweight and standalone executable package that includes everything needed to run software:
-     - Application code
-     - Runtime environment
-     - System libraries
-     - Environment variables
-     - Configuration files
+- Provides a lightweight and standalone executable package that includes everything needed to run software: - Application code - Runtime environment - System libraries - Environment variables - Configuration files
 
-![Docker Container Concept](assets/image.png)
+     <img src="assets/image.png" alt="Docker Container Concept" width="500" height="400">
 
 ## How it Works Behind the Scenes and How is it OS Independent?
 
