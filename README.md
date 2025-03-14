@@ -1,11 +1,13 @@
-# Docker Basics
+# Sharing my Docker Notes from start to end
+
+![alt text](assets/docker.png)
 
 ## Contents
 
 - [What is Docker?](#what-is-docker)
 - [Why Use Docker?](#why-use-docker)
 - [Key Benefits](#key-benefits)
-- [How it works behind the scene and how is it OS independent?](#how-it-works-behind-the-scene-and-how-is-it-os-independent)
+- [How it Works Behind the Scenes and How is it OS Independent?](#how-it-works-behind-the-scenes-and-how-is-it-os-independent)
      - [Core Architecture Components](#core-architecture-components)
      - [OS Independence Mechanism](#os-independence-mechanism)
 - [Docker vs. Virtual Machines Architecture](#docker-vs-virtual-machines-architecture)
@@ -16,7 +18,7 @@
      - [Commands](#commands)
      - [Port Mapping](#port-mapping)
      - [Setting Environment Variables](#setting-environment-variables)
-     - [DockerFile](#dockerfile)
+     - [Dockerfile](#dockerfile)
 - [Optimization](#optimization)
      - [Decreasing the Size of the Image](#decreasing-the-size-of-the-image)
      - [Order Matters](#order-matters)
@@ -26,6 +28,20 @@
 - [Docker Compose](#docker-compose)
      - [Defining Services](#defining-services)
      - [Starting and Stopping Services](#starting-and-stopping-services)
+- [Docker Networking](#docker-networking)
+     - [Network Drivers](#network-drivers)
+     - [Create a Custom Network](#create-a-custom-network)
+- [Volumes](#volumes)
+     - [Volume Types](#volume-types)
+- [Docker Swarm](#docker-swarm)
+     - [Swarm Concepts](#swarm-concepts)
+     - [Swarm Commands](#swarm-commands)
+     - [Create a Service](#create-a-service)
+     - [Scale a Service](#scale-a-service)
+     - [Update a Service](#update-a-service)
+     - [Remove a Service](#remove-a-service)
+     - [Deploy a Stack](#deploy-a-stack)
+     - [List Stacks](#list-stacks)
 
 ## What is Docker?
 
@@ -50,35 +66,35 @@ Docker is a platform that allows you to develop, ship, and run applications in c
 
 ![Docker Container Concept](assets/image.png)
 
-## How it works behind the scene and how is it OS independent?
+## How it Works Behind the Scenes and How is it OS Independent?
 
 Docker achieves OS independence and efficient resource usage through its architecture that combines virtualization concepts, efficient threading, and a central daemon:
 
 ### Core Architecture Components
 
 - **Docker Daemon**: A background service running on the host that manages building, running, and distributing Docker containers. It listens for API requests and handles container lifecycle.
-
 - **Containerization vs. Full Virtualization**: Unlike traditional VMs that virtualize an entire OS with their own kernel, Docker containers share the host OS kernel and isolate the application processes from each other.
 
 **Example**:
 When you run `docker run nginx`, here's what happens:
 
-1. The Docker client sends this command to the Docker daemon
-2. The daemon pulls the nginx image if not locally available
-3. The daemon creates a new container by using the host's kernel namespaces, control groups, and UnionFS
-4. The daemon assigns resources and executes the container process
+1. The Docker client sends this command to the Docker daemon.
+2. The daemon pulls the nginx image if not locally available.
+3. The daemon creates a new container by using the host's kernel namespaces, control groups, and UnionFS.
+4. The daemon assigns resources and executes the container process.
 
 ### OS Independence Mechanism
 
 Docker achieves cross-platform compatibility through:
 
-- **Abstraction Layer**: The Docker Engine provides a consistent interface regardless of the underlying OS
+- **Abstraction Layer**: The Docker Engine provides a consistent interface regardless of the underlying OS.
 - **OS-Specific Implementations**:
-     - On Linux: Uses native containerization features (namespaces, cgroups)
-     - On Windows/macOS: Runs a lightweight Linux VM (using Hyper-V or Hyperkit, WSL) that hosts the Docker daemon
+     - On Linux: Uses native containerization features (namespaces, cgroups).
+     - On Windows/macOS: Runs a lightweight Linux VM (using Hyper-V or Hyperkit, WSL) that hosts the Docker daemon.
 
-This architecture allows developers to build once and run anywhere without needing
-to worry about the host environment differences.
+This architecture allows developers to build once and run anywhere without needing to worry about the host environment differences.
+
+![alt text](assets/architechture.png)
 
 ## Docker vs. Virtual Machines Architecture
 
@@ -98,7 +114,7 @@ Docker containers and virtual machines use fundamentally different approaches to
 ├─────────────────────┤  ├─────────────────────┤
 │    Infrastructure   │  │    Infrastructure   │
 └─────────────────────┘  └─────────────────────┘
-    Virtual Machine              Docker
+          Virtual Machine              Docker
 ```
 
 ### Key Differences
@@ -117,6 +133,8 @@ This architectural difference is why Docker containers are more lightweight and 
 ## Getting Started
 
 To start using Docker, install Docker Desktop from the [official website](https://www.docker.com/products/docker-desktop).
+
+![alt text](assets/image-1.png)
 
 ### Images
 
@@ -167,6 +185,7 @@ Here are some essential Docker commands to manage containers and images:
      ```
 
 - List all Docker images:
+
      ```sh
      docker images
      ```
@@ -182,6 +201,7 @@ By default, Docker containers do not expose their ports to the host. To make a c
      ```
 
 - Example:
+
      ```sh
      docker run -p 8000:8000 <image_name>
      ```
@@ -197,36 +217,40 @@ You can set environment variables in a container using the `-e` flag:
      ```
 
 - Example:
+
      ```sh
      docker run -e ENV_VAR=production <image_name>
      ```
 
-### DockerFile
+### Dockerfile
 
 A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image. Using a Dockerfile, you can automate the building of Docker images.
 
 ```Dockerfile
-     FROM ubuntu
+FROM ubuntu
 
-     RUN apt-get update
-     RUN apt-get install -y curl
-     RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-     RUN apt-get upgrade -y
+RUN apt-get update
+RUN apt-get install -y curl
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get upgrade -y
 
-     RUN apt-get install -y nodejs
+RUN apt-get install -y nodejs
 
-     # COPY src dest
-     COPY package.json package.json
-     COPY package-lock.json package-lock.json
-     RUN npm install
+WORKDIR /app
 
-     # COPY app.js app.js
-     COPY . .
+# COPY src dest
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-     ENTRYPOINT [ "node", "app.js" ]
+# RUN cd app && npm install
+RUN npm install
+
+COPY . .
+
+ENTRYPOINT [ "node", "app.js" ]
 ```
 
-# Optimization
+## Optimization
 
 Optimizing Docker images and containers is crucial for improving performance, reducing build times, and minimizing resource usage. Here are some key strategies for optimization:
 
@@ -276,13 +300,6 @@ COPY --from=builder /app/node_modules ./node_modules
 CMD ["node", "dist/app.js"]
 ```
 
-```Dockerfile
-# Use cached layers for dependencies
-RUN apt-get update && apt-get install -y \
-     curl \
-     && rm -rf /var/lib/apt/lists/*
-```
-
 ### Docker Login and Push
 
 After building and optimizing your Docker image, you can push it to a Docker registry for distribution. Ensure you are logged in to your Docker account before pushing the image.
@@ -327,7 +344,6 @@ services:
 Use the following commands to manage your Docker Compose services:
 
 - `docker-compose up` - Start the services defined in the `docker-compose.yml` file. This command builds, (re)creates, starts, and attaches to containers for a service.
-
 - `docker-compose down` - Stop and remove the containers, networks, and volumes created by `docker-compose up`.
 
 ```sh
@@ -391,7 +407,7 @@ docker network ls
      docker run -d --network none nginx
      ```
 
-## Create my custom network:
+### Create a Custom Network
 
 ```sh
 docker network create --driver bridge my_custom_network
@@ -406,7 +422,7 @@ docker run -it --name container2 --network my_custom_network ubuntu
 docker network inspect my_custom_network
 ```
 
-# Volume:
+## Volumes
 
 - Containers do not persist data by default. When a container is removed, all data generated by the container is lost.
 - Volumes are used to persist data generated by and used by Docker containers.
@@ -459,43 +475,28 @@ docker swarm init
 ### Swarm Concepts
 
 - **Node**: A Docker host that is part of the Swarm cluster.
-
 - **Service**: Defines how a container should run in the Swarm cluster.
-
 - **Task**: An instance of a service running on a node.
-
 - **Manager Node**: Controls the Swarm cluster and schedules tasks.
-
 - **Worker Node**: Executes tasks assigned by the manager node.
 
 ### Swarm Commands
 
 - `docker swarm init` - Initialize a new Swarm cluster.
-
 - `docker swarm join` - Join a Docker host to the Swarm cluster.
-
 - `docker node ls` - List nodes in the Swarm cluster.
-
 - `docker service create` - Create a new service in the Swarm cluster.
-
 - `docker service ls` - List services in the Swarm cluster.
-
 - `docker service scale` - Scale a service to a specific number of replicas.
-
 - `docker service update` - Update the configuration of a service.
-
 - `docker service rm` - Remove a service from the Swarm cluster.
-
 - `docker stack deploy` - Deploy a new stack or update an existing stack.
-
 - `docker stack ls` - List stacks in the Swarm cluster.
-
 - `docker stack rm` - Remove a stack from the Swarm cluster.
 
 ### Create a Service
 
 ```sh
-
 docker service create --name my_service --replicas 3 nginx
 ```
 
@@ -508,14 +509,12 @@ docker service scale my_service=5
 ### Update a Service
 
 ```sh
-
 docker service update --image nginx:latest my_service
 ```
 
 ### Remove a Service
 
 ```sh
-
 docker service rm my_service
 ```
 

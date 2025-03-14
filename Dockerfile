@@ -7,11 +7,15 @@ RUN apt-get upgrade -y
 
 RUN apt-get install -y nodejs
 
+WORKDIR /app
+
 # COPY src dest
 COPY package.json package.json
 COPY package-lock.json package-lock.json
-COPY app.js app.js  
 
-RUN npm install 
+# RUN cd app && npm install 
+RUN npm install
+
+COPY . .  
 
 ENTRYPOINT [ "node", "app.js" ]
